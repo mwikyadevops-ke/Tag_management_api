@@ -1,0 +1,17 @@
+# Visual Studio / .NET
+bin/
+obj/
+*.user
+*.suo
+*.vscode/
+*.vs/
+*.db
+*.log
+
+# Rider IDE
+.idea/
+*.sln.iml
+
+# Others
+*.DS_Store
+*.env
