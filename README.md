@@ -1,9 +1,9 @@
 Vehicle Tagging and Weight Event Management System
-This project is an ASP.NET Core Web API for managing vehicle weigh events and automatic/manual tagging. 
+This project is an ASP.NET Core Web API for managing vehicle 
+weigh events and automatic/manual tagging. 
 It supports PostgreSQL for storage and Swagger UI for API exploration.
 
 Features
-
 1.Record vehicle weight events from external systems
 2.Automatic tagging for overloaded vehicles
 3.Manual tagging by users with reason and image
