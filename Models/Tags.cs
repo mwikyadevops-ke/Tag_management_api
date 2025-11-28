@@ -1,19 +1,12 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 using TagManagement.Enums;
+
 namespace TagManagement.Models
-   
 {
     public class Tags
     {
-
         [Key]
         public int Id { get; set; }
-        [ForeignKey("WeighEvent")]
-        public int? WeighEventId { get; set; }
-        public WeightEvents? WeighEvent { get; set; }
         public string TagType { get; set; } = "AUTO"; // AUTO or MANUAL
         public string Reason { get; set; } = string.Empty;
         public int? UserId { get; set; } // null → auto; not null → manual
@@ -26,6 +19,6 @@ namespace TagManagement.Models
         public DateTime? ClosedAt { get; set; }
         public TagStatus Status { get; set; } = TagStatus.open;
         public string? Notes { get; set; }
-
+        public string? CloseReason { get; set; } // Reason for closing the tag
     }
 }

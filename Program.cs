@@ -6,7 +6,12 @@ using TagManagement.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Configure JSON serializer to be case-insensitive
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -16,8 +21,11 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "TagManagement API",
         Version = "v1",
-        Description = "API for managing vehicle tags and weight events"
+        Description = "API for managing vehicle tags"
     });
+    
+    // Resolve conflicts when multiple actions have the same route but different content types
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 });
 
 // DbContext
@@ -26,6 +34,9 @@ builder.Services.AddDbContext<CaseDBContext>(options =>
 
 // Tag service
 builder.Services.AddScoped<IItagService, TagService>();
+
+// File upload service
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();
 
@@ -40,6 +51,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable static files serving (for uploaded images)
+app.UseStaticFiles();
+
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

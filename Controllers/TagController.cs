@@ -2,8 +2,6 @@
 using TagManagement.Dtos;
 using TagManagement.Services;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace TagManagement.Controllers
 {
     [Route("api/tags")]
@@ -12,25 +10,125 @@ namespace TagManagement.Controllers
     {
 
         private readonly IItagService _tagService;
-        public TagController(IItagService tagService)
+        private readonly IFileUploadService _fileUploadService;
+        
+        public TagController(IItagService tagService, IFileUploadService fileUploadService)
         {
             _tagService = tagService;
+            _fileUploadService = fileUploadService;
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateTag (TagCreateDto dto)
+        [Consumes("application/json")]
+        public async Task<IActionResult> CreateTag([FromBody] TagCreateDto dto)
         {
-            var tag = await _tagService.CreateTagAsync(dto);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            return Ok(tag);
+            return await CreateTagInternal(dto);
         }
 
-
-        // GET: api/<TagController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpPost("create")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateTagWithFile([FromForm] TagCreateFormDto formDto)
         {
-            return new string[] { "value1", "value2" };
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            string? imageUrl = null;
+            
+            // Handle image upload if provided
+            if (formDto.Image != null && formDto.Image.Length > 0)
+            {
+                try
+                {
+                    imageUrl = await _fileUploadService.SaveImageAsync(formDto.Image);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { error = $"Image upload failed: {ex.Message}" });
+                }
+            }
+            
+            // Convert form DTO to standard DTO
+            var dto = new TagCreateDto
+            {
+                UserId = formDto.UserId,
+                VehicleReg = formDto.VehicleReg ?? string.Empty,
+                Reason = formDto.Reason ?? string.Empty,
+                ImageUrl = imageUrl ?? formDto.ImageUrl,
+                StationId = formDto.StationId,
+                EventTimeStamp = formDto.EventTimeStamp ?? DateTime.UtcNow,
+                Notes = formDto.Notes
+            };
+
+            return await CreateTagInternal(dto);
+        }
+        
+        private async Task<IActionResult> CreateTagInternal(TagCreateDto dto)
+        {
+            try
+            {
+                var tag = await _tagService.CreateTagAsync(dto);
+                return Ok(tag);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while creating the tag", details = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllTags()
+        {
+            var tags = await _tagService.GetAllTagsAsync();
+            return Ok(tags);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchTags([FromQuery] TagSearchDto searchDto)
+        {
+            var tags = await _tagService.SearchTagsAsync(searchDto);
+            return Ok(tags);
+        }
+
+        [HttpPut("{id}/close")]
+        public async Task<IActionResult> CloseTag(int id, [FromBody] CloseTagDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var tag = await _tagService.CloseTagAsync(id, dto);
+                return Ok(tag);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while closing the tag", details = ex.Message });
+            }
         }
     }
 }
