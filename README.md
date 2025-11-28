@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Tag Management API
 
 A RESTful ASP.NET Core Web API for managing vehicle tags with support for automatic and manual tag creation, image uploads, and tag closure functionality.
@@ -13,9 +12,7 @@ A RESTful ASP.NET Core Web API for managing vehicle tags with support for automa
 - **Station Validation**: Tags can only be closed at the station where they were created
 - **Search & Filter**: Search tags by various criteria
 - **Swagger Documentation**: Interactive API documentation
--  **PostgreSQL Support**: Production-ready database storage
-=======
->>>>>>> 9dd86ba2cedf5e7677cd052eb45a49bab9ea04eb
+- **PostgreSQL Support**: Production-ready database storage
 
 ## Prerequisites
 
